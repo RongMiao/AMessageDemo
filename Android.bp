@@ -1,0 +1,22 @@
+cc_binary {
+    name: "AMessageDemo",
+
+    srcs: [
+        "PlayerDemo.cpp",
+        "main.cpp"
+    ],
+
+    shared_libs: [
+        "libstagefright_foundation",
+        "libutils",
+        "liblog"
+    ],
+
+    include_dirs: [
+        "frameworks/av/media/libstagefright/foundation/include"
+    ],
+
+    cflags: [
+        "-Wno-unused-parameter"
+    ]
+}
