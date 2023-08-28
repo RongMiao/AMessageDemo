@@ -18,9 +18,12 @@ PlayerDemo::~PlayerDemo() {
     mLooper->unregisterHandler(id());
 }
 
+status_t PlayerDemo::init() {
+    mLooper->registerHandler(this);       // can call here
+    return OK;
+}
 
 status_t PlayerDemo::setDataSource(const AString &url) {
-    //mLooper->registerHandler(this);       // can call here
     ALOGD("[%s %d]", __FUNCTION__, __LINE__);
     sp<AMessage> msg = new AMessage(kWhatSetDataSource, this);
     msg->setString("url", url);
@@ -47,7 +50,9 @@ status_t PlayerDemo::start() {
 status_t PlayerDemo::getFormat(sp<AMessage> &format) {
     ALOGD("[%s %d]", __FUNCTION__, __LINE__);
     sp<AMessage> msg = new AMessage(kWhatGetFormat, this);
-    return msg->postAndAwaitResponse(&format); 
+    sp<AMessage> response;
+    msg->postAndAwaitResponse(&response); 
+    return response->findMessage("format", &format);
 }
 
 status_t PlayerDemo::stop() {
@@ -63,7 +68,7 @@ void PlayerDemo::onMessageReceived(const sp<AMessage> &msg) {
         {
             AString url;
             CHECK(msg->findString("url", &url));
-            ALOGD("[%s %d] url = %s", __FUNCTION__, __LINE__, url.c_str());
+            ALOGD("[%s %d] process kWhatSetDataSource, url = %s", __FUNCTION__, __LINE__, url.c_str());
             break;
         }
         case kWhatPrepare:
@@ -74,7 +79,7 @@ void PlayerDemo::onMessageReceived(const sp<AMessage> &msg) {
             CHECK(msg->findMessage("format", &format));
             CHECK(format->findInt32("width", &mWidth));
             CHECK(format->findInt32("height", &mHeight));
-            ALOGD("[%s %d] width = %d, height = %d", __FUNCTION__, __LINE__, mWidth, mHeight);
+            ALOGD("[%s %d] process kWhatPrepare, width = %d, height = %d", __FUNCTION__, __LINE__, mWidth, mHeight);
             sleep(3);
             sp<AMessage> response = new AMessage;
             response->postReply(replyID);
@@ -82,11 +87,14 @@ void PlayerDemo::onMessageReceived(const sp<AMessage> &msg) {
         }
         case kWhatStart: 
         {
-            ALOGD("[%s %d] starting ...", __FUNCTION__, __LINE__);
+            ALOGD("[%s %d] process kWhatStart, starting ...", __FUNCTION__, __LINE__);
+            sleep(3);
+            ALOGD("[%s %d] process kWhatStart, ending ...", __FUNCTION__, __LINE__);
             break;
         }
         case kWhatGetFormat:
         {
+            ALOGD("[%s %d] process kWhatGetFormat", __FUNCTION__, __LINE__);
             sp<AReplyToken> replyID;
             CHECK(msg->senderAwaitsResponse(&replyID));
             sp<AMessage> format = new AMessage;
@@ -99,7 +107,7 @@ void PlayerDemo::onMessageReceived(const sp<AMessage> &msg) {
         }
         case kWhatStop:
         {
-            ALOGD("[%s %d] stop ...", __FUNCTION__, __LINE__);
+            ALOGD("[%s %d] process kWhatStop, stop ...", __FUNCTION__, __LINE__);
             break;
         }
         default:

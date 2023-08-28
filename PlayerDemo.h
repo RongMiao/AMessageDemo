@@ -11,6 +11,7 @@ struct AMessage;
 class PlayerDemo : public AHandler {
 public:
     PlayerDemo(const sp<android::ALooper> &looper);
+    status_t init();
     status_t setDataSource(const AString &url);
     status_t prepare(const sp<AMessage> &format);
     status_t start();
